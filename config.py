@@ -12,8 +12,8 @@ go = {
     "path" : "%s/svrs.conf" % ( _dir ),
     "conf" : {
         'desc' : 'Welcome to use go',
-        'pasw' : 'Hello World',
-        'port' : 22,
+        'pasw' : 'wechat',
+        'port' : 36000,
         'user' : 'root',
         'path' : '.',
         'cmd'  : ''

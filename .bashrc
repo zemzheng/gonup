@@ -8,3 +8,5 @@ function up(){
     python ./update.py $*
     cd -
 }
+complete -W "`python ~/complete.py go`" go
+complete -W "`python ~/complete.py up`" up
