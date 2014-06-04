@@ -1,0 +1,130 @@
+#!/usr/bin/expect -f
+# Author      zemzheng@gmail.com
+# Description Scp zip-pkg up and then unzip it & clear it.
+# Date        2013-12-09 +0800
+
+set tNormal  "\033\[0m"
+set tRed     "\033\[31m"
+set tGreen   "\033\[32m"
+set tYellow  "\033\[33m"
+set tBlue    "\033\[34m"
+set tMagenta "\033\[35m"
+set tCyan    "\033\[36m"
+set tWhite   "\033\[37m"
+
+proc sendColor2user { color txt } {
+  global tNormal
+  send_user "${color}${txt}${tNormal}"
+} 
+
+if { $argc != 4 } {
+  sendColor2user ${tCyan} "======================================================================================\n"
+  sendColor2user ${tCyan} "Author      "
+      sendColor2user ${tYellow} "zemzheng@gmail.com\n"
+  sendColor2user ${tCyan} "Date        "
+      sendColor2user ${tYellow} "2013-12-09 +800\n"
+  sendColor2user ${tCyan} "Description "
+      sendColor2user ${tYellow} "Scp zip-pkg up and then unzip it & clear it.\n"
+  sendColor2user ${tCyan} "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+
+  sendColor2user ${tGreen}   "usage scpThenUnzip.exp\n"
+
+  sendColor2user ${tYellow}  "  \$account@server "
+      sendColor2user ${tCyan}   "   | EXP: "
+      sendColor2user ${tCyan}   "  <root@127.0.0.1>\n"
+
+  sendColor2user ${tYellow}  "  \$password       "
+      sendColor2user ${tCyan}   "   | EXP: "
+      sendColor2user ${tCyan}   "  <123456789>\n"
+
+  sendColor2user ${tYellow}  "  \$package_path   "
+      sendColor2user ${tCyan}   "   | EXP: "
+      sendColor2user ${tCyan}   "  /tmp/\n"
+
+  sendColor2user ${tYellow}  "  \$package_name   "
+      sendColor2user ${tCyan}   "   | EXP: "
+      sendColor2user ${tCyan}   "  example.zip\n"
+
+  sendColor2user ${tCyan} "======================================================================================\n"
+  exit
+}
+
+set login_to     [lindex $argv 0]
+set login_pasw   [lindex $argv 1]
+set target_path  [lindex $argv 2]
+set package_name [lindex $argv 3]
+set now          [clock seconds]
+set tmp_path     "/tmp"
+
+# scp
+send_user "\n"
+sendColor2user ${tCyan} "======================================================================================\n"
+sendColor2user ${tYellow} "\[SCP\] "
+sendColor2user ${tGreen} "${package_name}"
+send_user "===>"
+sendColor2user ${tGreen} "${tmp_path}"
+send_user "\n"
+sendColor2user ${tYellow} "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+
+spawn scp ${package_name} ${login_to}:${tmp_path}
+    expect {
+      "assword:" {
+        send "${login_pasw}\r"
+      }
+      "yes/no)?" {
+        send "yes\r"
+        expect "assword:"
+        send "${login_pasw}\r"
+      }
+    }
+expect eof
+
+sendColor2user ${tGreen}  "...Done\n"
+sendColor2user ${tCyan} "======================================================================================\n"
+
+# unzip
+send_user "\n"
+sendColor2user ${tCyan} "======================================================================================\n"
+sendColor2user ${tYellow} "\[UNZIP\] "
+send_user "===>"
+sendColor2user ${tGreen} "${target_path}"
+send_user "\n"
+sendColor2user ${tYellow} "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+
+spawn ssh ${login_to} "unzip -d ${target_path} -o ${tmp_path}/${package_name}"
+    expect {
+      "assword:" {
+        send "${login_pasw}\r"
+      }
+      "yes/no)?" {
+        send "yes\r"
+        expect "assword:"
+        send "${login_pasw}\r"
+      }
+    }
+expect eof
+
+# clean
+send_user "\n"
+sendColor2user ${tCyan} "======================================================================================\n"
+sendColor2user ${tYellow} "\[CLEAN\] "
+send_user "===>"
+sendColor2user ${tGreen} "${tmp_path}/${package_name}"
+send_user "\n"
+sendColor2user ${tYellow} "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+
+spawn ssh ${login_to} "rm -rf ${tmp_path}/${package_name}"
+    expect {
+      "assword:" {
+        send "${login_pasw}\r"
+      }
+      "yes/no)?" {
+        send "yes\r"
+        expect "assword:"
+        send "${login_pasw}\r"
+      }
+    }
+expect eof
+
+sendColor2user ${tGreen}  "...Done\n"
+sendColor2user ${tCyan} "======================================================================================\n"

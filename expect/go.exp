@@ -1,0 +1,38 @@
+#!/usr/bin/expect -f
+# Author      zemzheng@gmail.com
+# Date        2013-12-09 +0800
+
+set HOST [lindex $argv 0]
+set USER [lindex $argv 1]
+set PWD  [lindex $argv 2]
+set PORT [lindex $argv 3]
+set PATH [lindex $argv 4]
+set CMD  [lindex $argv 5]
+
+spawn ssh -p $PORT $USER@$HOST
+
+# login 
+expect {
+  "assword:" {
+    send "$PWD\r"
+  }
+  "yes/no)?" {
+    send "yes\r"
+    expect "assword:"
+    send "$PWD\r"
+  }
+}
+
+# cd path
+if { "" != $PATH } {
+    expect -re "(>|#|\$)$"
+    send "cd $PATH\r"
+}
+
+# cmd
+if { "" != $CMD } {
+    expect -re "(>|#|\$)$"
+    send "$CMD\r"
+}
+
+interact
